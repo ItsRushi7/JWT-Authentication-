@@ -1,6 +1,9 @@
 const mongodb = require('mongoose')
+const dotenv = require('dotenv')
 
-const connected = mongodb.connect('mongodb://localhost:27017/Auth')
+dotenv.config()
+
+const connected = mongodb.connect(process.env.DATABASE_URL)
 
 connected.then(() => {
     console.log('Mongodb Connected...')

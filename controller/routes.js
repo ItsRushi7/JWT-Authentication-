@@ -1,4 +1,10 @@
+const { json } = require('express')
 const { User } = require('../model/connection')
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
+const dotenv = require('dotenv')
+
+dotenv.config()
 
 async function login(req, res) {
     const data = req.body
@@ -17,9 +23,15 @@ async function login(req, res) {
         });
     }
     else {
-        res.status(200).render('login', {
-            message: 'yes'
-        });
+        jwt.sign({ findUser },process.env.SECRET_KEY , (error, token) => {
+
+            if (error) {
+                console.log(error)
+            }
+            res.cookie('uid', token,)
+            res.status(200).redirect('/home')
+        })
+
     }
 }
 
@@ -52,7 +64,22 @@ async function signup(req, res) {
     }
 }
 
+function jwtVerification(req, res, next) {
+    
+    const token = req.cookies.uid
+
+    jwt.verify(token, process.env.SECRET_KEY, (error, verifyData) => {
+        if (error) {
+            res.send({ message: 'Invalid Token' })
+        }
+        else {
+            next()
+        }
+    })
+
+}
 module.exports = {
     login,
-    signup
+    signup,
+    jwtVerification
 }
